@@ -1,6 +1,8 @@
 package com.example.what2do_today.ui.screen
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -17,14 +19,15 @@ fun ResultScreen(
     sharedVm: What2DoViewModel,
     onBack: () -> Unit
 ) {
-    val plan by sharedVm.selectedItinerary.collectAsState()
+    val plan by sharedVm.selectedPlan.collectAsState()
     val mapVm: ResultMapViewModel = viewModel()
     val mapState by mapVm.state.collectAsState()
 
+    // 코스가 바뀔 때마다 마커/카메라 갱신
     LaunchedEffect(plan?.id) {
-        plan?.let { itn ->
-            val points = itn.steps.mapNotNull { s ->
-                val lat = s.place.lat; val lng = s.place.lng
+        plan?.let { p ->
+            val points = p.plan.mapNotNull { place ->
+                val lat = place.lat; val lng = place.lng
                 if (lat != null && lng != null) LatLng(lat, lng) else null
             }
             mapVm.setMarkers(points, zoom = if (points.size >= 2) 13f else 15f)
@@ -32,9 +35,22 @@ fun ResultScreen(
     }
 
     Scaffold(
-        topBar = { TopAppBar(title = { Text("코스 상세") }) }
+        topBar = {
+            TopAppBar(
+                title = { Text("코스 상세") },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(
+                            imageVector = Icons.Default.ArrowBack,
+                            contentDescription = "뒤로"
+                        )
+                    }
+                }
+            )
+        }
     ) { inner ->
         Column(Modifier.padding(inner)) {
+
             // 1) 지도
             ResultMap(
                 modifier = Modifier
@@ -45,17 +61,22 @@ fun ResultScreen(
                 cameraZoom = mapState.cameraZoom
             )
 
-            // 2) 상세 정보 (기존 UI)
+            // 2) 상세 정보
             Column(Modifier.padding(16.dp)) {
                 if (plan == null) {
                     Text("선택된 코스가 없습니다.")
                 } else {
                     Text("Plan ${plan!!.id}", style = MaterialTheme.typography.titleLarge)
-                    Text("총거리 ${plan!!.totalDistanceKm ?: "-"} km · 총소요 ${plan!!.totalDurationMin ?: "-"}분")
+                    Text(
+                        "총거리 ${plan!!.totalDistanceKm ?: "-"} km · " +
+                                "총소요 ${plan!!.totalDurationMin ?: "-"}분"
+                    )
                     Divider()
-                    plan!!.steps.forEachIndexed { i, step ->
-                        Text("${i + 1}. ${step.place.name} (${step.place.category})")
-                        step.place.address?.let { Text(it, style = MaterialTheme.typography.bodySmall) }
+                    plan!!.plan.forEachIndexed { i, place ->
+                        Text("${i + 1}. ${place.name} (${place.category})")
+                        place.address?.let {
+                            Text(it, style = MaterialTheme.typography.bodySmall)
+                        }
                     }
                 }
             }

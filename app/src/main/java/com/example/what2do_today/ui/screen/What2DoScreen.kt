@@ -17,32 +17,40 @@ import com.example.what2do_today.viewmodel.What2DoViewModel
 @Composable
 fun What2DoScreen(
     vm: What2DoViewModel,
-    goCategory: () -> Unit
+    goCategory: () -> Unit,
+    onRequestLocation: (((Double?, Double?) -> Unit) -> Unit)
 ) {
     var query by remember { mutableStateOf(TextFieldValue("")) }
-
-    //카테고리 가중치 임시데이터
-    var categoryScores by remember {
-        mutableStateOf(mapOf("restaurant" to 60, "cafe" to 40, "amusement_park" to 50))
-    }
     val uiState by vm.categoryState.collectAsState()
 
     Scaffold(topBar = { TopAppBar(title = { Text("메인 기능") }) }) { inner ->
-        Column(Modifier.padding(inner).padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Column(
+            Modifier
+                .padding(inner)
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
             OutlinedTextField(
                 value = query,
                 onValueChange = { query = it },
                 label = { Text("자연어 쿼리") },
                 modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
                 keyboardOptions = KeyboardOptions(
                     imeAction = ImeAction.Search,
                     keyboardType = KeyboardType.Text
                 ),
                 keyboardActions = KeyboardActions(
                     onSearch = {
-                        if (query.text.isNotBlank()) {
-                            vm.loadCategories(query.text, categoryScores)
-                            goCategory()
+                        if (query.text.isNotBlank() && uiState !is CategoryUiState.Loading) {
+                            // 🔥 검색 시점의 최신 위치를 먼저 가져온 뒤 카테고리 요청
+                            onRequestLocation { lat, lng ->
+                                if (lat != null && lng != null) {
+                                    vm.setCurrentLocation(lat, lng)
+                                }
+                                vm.loadCategories(query.text)
+                                goCategory()
+                            }
                         }
                     }
                 )
@@ -50,12 +58,24 @@ fun What2DoScreen(
 
             Button(
                 onClick = {
-                    vm.loadCategories(query.text, categoryScores)
-                    goCategory()
+                    if (query.text.isNotBlank()) {
+                        onRequestLocation { lat, lng ->
+                            if (lat != null && lng != null) {
+                                vm.setCurrentLocation(lat, lng)
+                            }
+                            vm.loadCategories(query.text)
+                            goCategory()
+                        }
+                    }
                 },
-                enabled = uiState !is CategoryUiState.Loading
+                enabled = uiState !is CategoryUiState.Loading && query.text.isNotBlank()
             ) {
-                Text(if (uiState is CategoryUiState.Loading) "요청 중..." else "카테고리 받기")
+                Text(
+                    if (uiState is CategoryUiState.Loading)
+                        "요청 중..."
+                    else
+                        "카테고리 받기"
+                )
             }
         }
     }

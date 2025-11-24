@@ -7,7 +7,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.example.what2do_today.network.Itinerary
+import com.example.what2do_today.network.Plan
 import com.example.what2do_today.viewmodel.PlanUiState
 import com.example.what2do_today.viewmodel.What2DoViewModel
 
@@ -15,7 +15,7 @@ import com.example.what2do_today.viewmodel.What2DoViewModel
 @Composable
 fun PlanScreen(
     vm: What2DoViewModel,
-    onSelectPlan: (Itinerary) -> Unit,
+    onSelectPlan: (Plan) -> Unit,
     onBack: () -> Unit
 ) {
     val state by vm.planState.collectAsState()
@@ -27,12 +27,16 @@ fun PlanScreen(
                     Modifier.padding(inner).padding(16.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    items(s.itineraries) { it ->
-                        ElevatedCard(onClick = { onSelectPlan(it) }) {
+                    items(s.plans) { plan ->        // 🔁 s.itineraries → s.plans
+                        ElevatedCard(onClick = { onSelectPlan(plan) }) {
                             Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                                Text("Plan ${it.id}", style = MaterialTheme.typography.titleMedium)
-                                Text("총거리 ${it.totalDistanceKm ?: "-"} km · 총소요 ${it.totalDurationMin ?: "-"}분 · 예산~${it.totalCostEstimate ?: "-"}원")
-                                Text("스텝 ${it.steps.size}개  |  점수 ${it.score ?: "-"}")
+                                Text("Plan ${plan.id}", style = MaterialTheme.typography.titleMedium)
+                                Text(
+                                    "총거리 ${plan.totalDistanceKm ?: "-"} km · " +
+                                            "총소요 ${plan.totalDurationMin ?: "-"}분 · " +
+                                            "예산~${plan.totalCostEstimate ?: "-"}원"
+                                )
+                                Text("장소 ${plan.plan.size}개  |  점수 ${plan.score ?: "-"}")
                             }
                         }
                     }

@@ -18,7 +18,7 @@ class ResultMapViewModel : ViewModel() {
     fun setMarkers(points: List<LatLng>, zoom: Float = 14f) {
         _state.value = ResultMapState(
             markers = points,
-            cameraTarget = points.firstOrNull(),
+            cameraTarget = points.firstOrNull(), // ⭐ 첫 번째 장소를 중심으로
             cameraZoom = zoom
         )
     }

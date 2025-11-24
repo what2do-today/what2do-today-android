@@ -8,9 +8,10 @@ import androidx.navigation.compose.rememberNavController
 import com.example.what2do_today.ui.screen.*
 import com.example.what2do_today.viewmodel.What2DoViewModel
 import java.time.LocalDate
-
 @Composable
-fun AppNav() {
+fun AppNav(
+    onRequestLocation: (((Double?, Double?) -> Unit) -> Unit)
+) {
     val nav = rememberNavController()
     val vm: What2DoViewModel = viewModel()
 
@@ -22,7 +23,8 @@ fun AppNav() {
                 onClickCalendarScreen = { nav.navigate(Routes.CALENDAR)}
             )
         }
-        composable(Routes.CALENDAR){
+
+        composable(Routes.CALENDAR) {
             val dummyEvents = listOf(
                 CalendarEvent(LocalDate.now(), "점심 약속"),
                 CalendarEvent(LocalDate.now().plusDays(1), "스터디 모임"),
@@ -37,7 +39,8 @@ fun AppNav() {
         composable(Routes.WHAT2DO) {
             What2DoScreen(
                 vm = vm,
-                goCategory = { nav.navigate(Routes.CATEGORY) }
+                goCategory = { nav.navigate(Routes.CATEGORY) },
+                onRequestLocation = onRequestLocation      // 🔥추가
             )
         }
 
@@ -50,10 +53,10 @@ fun AppNav() {
         }
 
         composable(Routes.PLAN) {
-            PlanScreen( // 플랜(코스) 목록
+            PlanScreen(
                 vm = vm,
-                onSelectPlan = {
-                    vm.selectItinerary(it)
+                onSelectPlan = { plan ->
+                    vm.selectPlan(plan)
                     nav.navigate(Routes.RESULT)
                 },
                 onBack = { nav.popBackStack() }
@@ -62,7 +65,7 @@ fun AppNav() {
 
         composable(Routes.RESULT) {
             ResultScreen(
-                sharedVm = vm,      // 선택 플랜(itinerary) 공유
+                sharedVm = vm,
                 onBack = { nav.popBackStack() }
             )
         }
