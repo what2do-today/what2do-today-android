@@ -4,20 +4,17 @@ import com.example.what2do_today.network.*
 
 class What2DoRepository {
 
-    // Main → 서버: query(+scores) 전송 → 카테고리 "이름 리스트" 수신
+    // 자연어 → 카테고리 리스트
     suspend fun fetchCategories(
-        query: String,
-        categoryScores: Map<String, Int>? = null
+        query: String
     ): List<String> {
-        val res = NetworkModule.api.getCategories(
-            SuggestRequest(query = query, categoryScores = categoryScores)
-        )
+        val res = NetworkModule.api.getCategories(query)
         return res.categories
     }
 
-    // Category → 서버: 선택 카테고리만 전송 → 코스 목록 수신
-    suspend fun fetchPlans(categories: List<String>): List<Itinerary> {
-        val res = NetworkModule.api.getPlans(PlanRequest(categories = categories))
-        return res.itineraries
+    // 선택한 카테고리 리스트 → 코스(플랜) 리스트
+    suspend fun fetchPlans(categories: List<String>): List<Plan> {
+        val res = NetworkModule.api.getPlans(categories)
+        return res.plans
     }
 }
