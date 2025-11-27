@@ -1,5 +1,6 @@
 package com.example.what2do_today.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.what2do_today.data.What2DoRepository
@@ -38,21 +39,26 @@ class What2DoViewModel(
     private val _selectedPlan = MutableStateFlow<Plan?>(null)   // 🔁 이름/타입 변경
     val selectedPlan: StateFlow<Plan?> = _selectedPlan
 
-    fun loadCategories(query: String) {
+    private val _currentLocation = MutableStateFlow<Pair<Double, Double>?>(null)
+    val currentLocation: StateFlow<Pair<Double, Double>?> = _currentLocation
 
-        /* 현재위치 정보
-        val loc = currentLocation.value
-        val (lat, lng) = loc ?: (null to null)
-         */
+    fun setCurrentLocation(lat: Double, lng: Double) {
+        _currentLocation.value = lat to lng
+    }
 
+    // 자연어 + 위치 같이 서버로 보내는 함수
+    fun loadCategories(query: String, lat: Double? = null, lng: Double? = null) {
+        Log.d("What2DoViewModel", "query=$query, lat=$lat, lng=$lng")
+        
         viewModelScope.launch {
             _categoryState.value = CategoryUiState.Loading
-            runCatching { repo.fetchCategories(query) }
-                .onSuccess { _categoryState.value = CategoryUiState.Success(it) }
-                .onFailure {
-                    _categoryState.value = CategoryUiState.Error(it.message ?: "오류")
-                }
-
+            runCatching {
+                repo.fetchCategories(query, lat, lng)
+            }.onSuccess { cats ->
+                _categoryState.value = CategoryUiState.Success(cats)
+            }.onFailure { e ->
+                _categoryState.value = CategoryUiState.Error(e.message ?: "오류")
+            }
         }
     }
 
@@ -72,15 +78,6 @@ class What2DoViewModel(
     }
 
     fun selectPlan(plan: Plan) { _selectedPlan.value = plan }
-
-
-
-    private val _currentLocation = MutableStateFlow<Pair<Double, Double>?>(null)
-    val currentLocation: StateFlow<Pair<Double, Double>?> = _currentLocation
-
-    fun setCurrentLocation(lat: Double, lng: Double) {
-        _currentLocation.value = lat to lng
-    }
 
 
 }

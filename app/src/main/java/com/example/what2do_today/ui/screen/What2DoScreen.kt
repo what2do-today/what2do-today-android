@@ -10,18 +10,21 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
+import com.example.what2do_today.location.LocationHelper
 import com.example.what2do_today.viewmodel.CategoryUiState
 import com.example.what2do_today.viewmodel.What2DoViewModel
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun What2DoScreen(
     vm: What2DoViewModel,
     goCategory: () -> Unit,
-    onRequestLocation: (((Double?, Double?) -> Unit) -> Unit)
+    locationHelper: LocationHelper
 ) {
     var query by remember { mutableStateOf(TextFieldValue("")) }
     val uiState by vm.categoryState.collectAsState()
+    val scope = rememberCoroutineScope()
 
     Scaffold(topBar = { TopAppBar(title = { Text("메인 기능") }) }) { inner ->
         Column(
@@ -43,12 +46,12 @@ fun What2DoScreen(
                 keyboardActions = KeyboardActions(
                     onSearch = {
                         if (query.text.isNotBlank() && uiState !is CategoryUiState.Loading) {
-                            // 🔥 검색 시점의 최신 위치를 먼저 가져온 뒤 카테고리 요청
-                            onRequestLocation { lat, lng ->
+                            scope.launch {
+                                val (lat, lng) = locationHelper.getCurrentLocation()
                                 if (lat != null && lng != null) {
                                     vm.setCurrentLocation(lat, lng)
                                 }
-                                vm.loadCategories(query.text)
+                                vm.loadCategories(query.text, lat, lng)
                                 goCategory()
                             }
                         }
@@ -58,12 +61,13 @@ fun What2DoScreen(
 
             Button(
                 onClick = {
-                    if (query.text.isNotBlank()) {
-                        onRequestLocation { lat, lng ->
+                    if (query.text.isNotBlank() && uiState !is CategoryUiState.Loading) {
+                        scope.launch {
+                            val (lat, lng) = locationHelper.getCurrentLocation()
                             if (lat != null && lng != null) {
                                 vm.setCurrentLocation(lat, lng)
                             }
-                            vm.loadCategories(query.text)
+                            vm.loadCategories(query.text, lat, lng)
                             goCategory()
                         }
                     }
