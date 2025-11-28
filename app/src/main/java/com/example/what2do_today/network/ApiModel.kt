@@ -2,15 +2,64 @@ package com.example.what2do_today.network
 
 import com.google.gson.annotations.SerializedName
 
+// 로그인
 
-// 자연어 → 카테고리 리스트 응답
-data class CategoryListResponse(
-    @SerializedName("tags")
-    val categories: List<String>
+// ------------------------------------------------------
+// 1. /api/v1/recommend 응답 전체
+// ------------------------------------------------------
+data class RecommendResponse(
+    val nlpTimeMs: Long,
+    val apiTimeMs: Long,
+    val totalTimeMs: Long,
+    val location: String?,
+    val placeKeywords: List<String>,
+    val activity: List<String>,
+    val activityTags: List<String>,   // 🌟 CategoryScreen에서 사용하는 태그
+    val timeSpecific: String?,
+    val timeLengthHour: Int,
+    val companionType: String?,
+    val companionNum: Int,
+    val budgetType: String?,
+    val budgetAmount: Int,
+    val searchLatitude: Double,
+    val searchLongitude: Double,
+    val nearbyPlaces: List<NearbyPlace>,
+    val courses: List<Course>
 )
 
+// 주변 장소 (지도 마커용)
+data class NearbyPlace(
+    val placeId: String,
+    val name: String,
+    val latitude: Double,
+    val longitude: Double,
+    val rating: Double,
+    val address: String,
+    val tag: String
+)
 
-// 카테고리 -> 코스 추천
+// 추천 코스 한 개
+data class Course(
+    val name: String,                 // "Recommended Course (pc방, 패스트푸드)"
+    val description: String,          // "Optimized route through 2 locations."
+    val totalDistanceMeters: Int,
+    val places: List<CoursePlace>     // 순서대로 방문할 장소들
+)
+
+// 코스 안의 장소
+data class CoursePlace(
+    val placeId: String,
+    val name: String,
+    val latitude: Double,
+    val longitude: Double,
+    val rating: Double,
+    val address: String,
+    val tag: String
+)
+
+// ------------------------------------------------------
+// 2. /api/v1/plans 응답 (기존 코스 API 그대로 쓰고 싶을 때)
+
 data class Place(
     val id: String,
     val name: String,

@@ -5,12 +5,14 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.what2do_today.location.LocationHelper
 import com.example.what2do_today.ui.screen.*
 import com.example.what2do_today.viewmodel.What2DoViewModel
 import java.time.LocalDate
+
 @Composable
 fun AppNav(
-    onRequestLocation: (((Double?, Double?) -> Unit) -> Unit)
+    locationHelper: LocationHelper
 ) {
     val nav = rememberNavController()
     val vm: What2DoViewModel = viewModel()
@@ -20,7 +22,7 @@ fun AppNav(
         composable(Routes.HOME) {
             HomeScreen(
                 onClickWhat2DoScreen = { nav.navigate(Routes.WHAT2DO) },
-                onClickCalendarScreen = { nav.navigate(Routes.CALENDAR)}
+                onClickCalendarScreen = { nav.navigate(Routes.CALENDAR) }
             )
         }
 
@@ -40,7 +42,7 @@ fun AppNav(
             What2DoScreen(
                 vm = vm,
                 goCategory = { nav.navigate(Routes.CATEGORY) },
-                onRequestLocation = onRequestLocation      // 🔥추가
+                locationHelper = locationHelper
             )
         }
 

@@ -15,6 +15,9 @@ import com.example.what2do_today.viewmodel.CategoryUiState
 import com.example.what2do_today.viewmodel.What2DoViewModel
 import kotlinx.coroutines.launch
 
+private const val DEFAULT_LAT_GANGNAM = 37.4979
+private const val DEFAULT_LNG_GANGNAM = 127.0276
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun What2DoScreen(
@@ -47,11 +50,18 @@ fun What2DoScreen(
                     onSearch = {
                         if (query.text.isNotBlank() && uiState !is CategoryUiState.Loading) {
                             scope.launch {
-                                val (lat, lng) = locationHelper.getCurrentLocation()
+
+
+                                val (rawLat, rawLng) = locationHelper.getCurrentLocation()
+                                val lat = rawLat ?: DEFAULT_LAT_GANGNAM
+                                val lng = rawLng ?: DEFAULT_LNG_GANGNAM
+
+                                /*val (lat, lng) = locationHelper.getCurrentLocation()
                                 if (lat != null && lng != null) {
                                     vm.setCurrentLocation(lat, lng)
-                                }
-                                vm.loadCategories(query.text, lat, lng)
+                                }*/
+
+                                vm.loadCategories(lat, lng, query.text)
                                 goCategory()
                             }
                         }
@@ -63,11 +73,16 @@ fun What2DoScreen(
                 onClick = {
                     if (query.text.isNotBlank() && uiState !is CategoryUiState.Loading) {
                         scope.launch {
-                            val (lat, lng) = locationHelper.getCurrentLocation()
+
+                            val (rawLat, rawLng) = locationHelper.getCurrentLocation()
+                            val lat = rawLat ?: DEFAULT_LAT_GANGNAM
+                            val lng = rawLng ?: DEFAULT_LNG_GANGNAM
+
+                            /*val (lat, lng) = locationHelper.getCurrentLocation()
                             if (lat != null && lng != null) {
                                 vm.setCurrentLocation(lat, lng)
-                            }
-                            vm.loadCategories(query.text, lat, lng)
+                            }*/
+                            vm.loadCategories(lat, lng, query.text)
                             goCategory()
                         }
                     }

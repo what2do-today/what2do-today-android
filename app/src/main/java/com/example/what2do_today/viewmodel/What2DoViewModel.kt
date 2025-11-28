@@ -47,15 +47,17 @@ class What2DoViewModel(
     }
 
     // 자연어 + 위치 같이 서버로 보내는 함수
-    fun loadCategories(query: String, lat: Double? = null, lng: Double? = null) {
-        Log.d("What2DoViewModel", "query=$query, lat=$lat, lng=$lng")
-        
+    fun loadCategories(latitude: Double?,
+                       longitude: Double?,
+                       query: String) {
+
+
         viewModelScope.launch {
             _categoryState.value = CategoryUiState.Loading
             runCatching {
-                repo.fetchCategories(query, lat, lng)
-            }.onSuccess { cats ->
-                _categoryState.value = CategoryUiState.Success(cats)
+                repo.fetchCategories(latitude, longitude, query)
+            }.onSuccess { tags ->
+                _categoryState.value = CategoryUiState.Success(tags)
             }.onFailure { e ->
                 _categoryState.value = CategoryUiState.Error(e.message ?: "오류")
             }
