@@ -57,6 +57,10 @@ data class CoursePlace(
     val tag: String
 )
 
+data class CourseResponse(
+    val courses: List<Course>
+)
+
 // ------------------------------------------------------
 // 2. /api/v1/plans 응답 (기존 코스 API 그대로 쓰고 싶을 때)
 
@@ -82,4 +86,19 @@ data class Plan(
 
 data class Plans(
     val plans: List<Plan>
+)
+
+
+// ------------------------------------------------------
+//길찾기
+data class DirectionsResponse(
+    val routes: List<Route>
+)
+
+data class Route(
+    val overview_polyline: OverviewPolyline
+)
+
+data class OverviewPolyline(
+    val points: String  // 인코딩된 polyline 문자열
 )

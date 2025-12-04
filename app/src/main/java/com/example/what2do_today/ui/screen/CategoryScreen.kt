@@ -28,7 +28,7 @@ fun CategoryScreen(
                 Spacer(Modifier.weight(1f))
                 Button(
                     onClick = {
-                        vm.loadPlans()
+                        vm.loadCourses()
                         onNext()
                     },
                     enabled = selected.isNotEmpty() && state is CategoryUiState.Success

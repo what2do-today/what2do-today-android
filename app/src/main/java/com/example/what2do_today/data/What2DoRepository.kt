@@ -30,9 +30,9 @@ class What2DoRepository {
     }
 
     // 선택한 카테고리 리스트 → 코스(플랜) 리스트
-    suspend fun fetchPlans(categories: List<String>): List<Plan> {
+    suspend fun fetchCourses(categories: List<String>): List<Course> {
         val res = NetworkModule.api.getPlans(categories)
-        return res.plans
+        return res.courses
     }
 
 

@@ -7,47 +7,98 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.example.what2do_today.network.Plan
-import com.example.what2do_today.viewmodel.PlanUiState
+import com.example.what2do_today.network.Course
+import com.example.what2do_today.viewmodel.CourseUiState
 import com.example.what2do_today.viewmodel.What2DoViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PlanScreen(
     vm: What2DoViewModel,
-    onSelectPlan: (Plan) -> Unit,
+    onSelectCourse: (Course) -> Unit,
     onBack: () -> Unit
 ) {
-    val state by vm.planState.collectAsState()
+    val state by vm.courseState.collectAsState()
 
-    Scaffold(topBar = { TopAppBar(title = { Text("추천 코스") }) }) { inner ->
+    Scaffold(
+        topBar = { TopAppBar(title = { Text("추천 코스") }) }
+    ) { inner ->
         when (val s = state) {
-            is PlanUiState.Success -> {
+            is CourseUiState.Success -> {
+                val courses = s.courses
+
                 LazyColumn(
-                    Modifier.padding(inner).padding(16.dp),
+                    modifier = Modifier
+                        .padding(inner)
+                        .padding(16.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    items(s.plans) { plan ->        // 🔁 s.itineraries → s.plans
-                        ElevatedCard(onClick = { onSelectPlan(plan) }) {
-                            Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                                Text("Plan ${plan.id}", style = MaterialTheme.typography.titleMedium)
+                    items(courses) { course ->
+                        ElevatedCard(
+                            onClick = { onSelectCourse(course) }
+                        ) {
+                            Column(
+                                modifier = Modifier.padding(12.dp),
+                                verticalArrangement = Arrangement.spacedBy(6.dp)
+                            ) {
+                                // 코스 이름
                                 Text(
-                                    "총거리 ${plan.totalDistanceKm ?: "-"} km · " +
-                                            "총소요 ${plan.totalDurationMin ?: "-"}분 · " +
-                                            "예산~${plan.totalCostEstimate ?: "-"}원"
+                                    text = course.name,
+                                    style = MaterialTheme.typography.titleMedium
                                 )
-                                Text("장소 ${plan.plan.size}개  |  점수 ${plan.score ?: "-"}")
+
+                                // 총 거리 (m → km)
+                                val distanceKm = course.totalDistanceMeters / 1000.0
+                                Text(
+                                    text = "총거리 %.1f km".format(distanceKm)
+                                )
+
+                                // 장소 개수
+                                Text("장소 ${course.places.size}개")
+
+                                // 설명
+                                if (course.description.isNotBlank()) {
+                                    Text(
+                                        text = course.description,
+                                        style = MaterialTheme.typography.bodySmall
+                                    )
+                                }
                             }
                         }
                     }
                 }
             }
-            is PlanUiState.Error -> Column(Modifier.padding(inner).padding(16.dp)) {
-                Text("불러오기 실패: ${s.message}", color = MaterialTheme.colorScheme.error)
+
+            is CourseUiState.Error -> Column(
+                modifier = Modifier
+                    .padding(inner)
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Text(
+                    text = "불러오기 실패: ${s.message}",
+                    color = MaterialTheme.colorScheme.error
+                )
                 OutlinedButton(onClick = onBack) { Text("뒤로") }
             }
-            is PlanUiState.Loading -> Box(Modifier.padding(inner).fillMaxSize()) { CircularProgressIndicator() }
-            PlanUiState.Idle -> Box(Modifier.padding(inner).fillMaxSize()) { Text("카테고리를 먼저 선택해 주세요") }
+
+            is CourseUiState.Loading -> Box(
+                modifier = Modifier
+                    .padding(inner)
+                    .fillMaxSize(),
+                contentAlignment = androidx.compose.ui.Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
+
+            CourseUiState.Idle -> Box(
+                modifier = Modifier
+                    .padding(inner)
+                    .fillMaxSize(),
+                contentAlignment = androidx.compose.ui.Alignment.Center
+            ) {
+                Text("카테고리를 먼저 선택해 주세요")
+            }
         }
     }
 }

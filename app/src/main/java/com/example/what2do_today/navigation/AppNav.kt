@@ -41,7 +41,7 @@ fun AppNav(
         composable(Routes.WHAT2DO) {
             What2DoScreen(
                 vm = vm,
-                goCategory = { nav.navigate(Routes.CATEGORY) },
+                goPlan = { nav.navigate(Routes.PLAN) },
                 locationHelper = locationHelper
             )
         }
@@ -57,8 +57,8 @@ fun AppNav(
         composable(Routes.PLAN) {
             PlanScreen(
                 vm = vm,
-                onSelectPlan = { plan ->
-                    vm.selectPlan(plan)
+                onSelectCourse = { course ->
+                    vm.selectCourse(course)
                     nav.navigate(Routes.RESULT)
                 },
                 onBack = { nav.popBackStack() }
