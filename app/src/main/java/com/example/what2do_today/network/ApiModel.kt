@@ -4,10 +4,17 @@ import com.google.gson.annotations.SerializedName
 
 // 로그인
 
+
+data class FirstResponse(
+    val sessionId: String,
+    val activityTags: List<String>,
+    val extractedLocation: String?
+)
+
 // ------------------------------------------------------
 // 1. /api/v1/recommend 응답 전체
 // ------------------------------------------------------
-data class RecommendResponse(
+data class SecondResponse(
     val nlpTimeMs: Long,
     val apiTimeMs: Long,
     val totalTimeMs: Long,
@@ -55,37 +62,6 @@ data class CoursePlace(
     val rating: Double,
     val address: String,
     val tag: String
-)
-
-data class CourseResponse(
-    val courses: List<Course>
-)
-
-// ------------------------------------------------------
-// 2. /api/v1/plans 응답 (기존 코스 API 그대로 쓰고 싶을 때)
-
-data class Place(
-    val id: String,
-    val name: String,
-    val category: String,
-    val address: String? = null,
-    val lat: Double? = null, //위도
-    val lng: Double? = null, //경도
-    val rating: Double? = null // 별점
-)
-
-
-data class Plan(
-    val id: String,
-    val plan: List<Place>,
-    val score: Double? = null,      // 추천 점수
-    val totalDistanceKm: Double? = null, // 총 이동거리
-    val totalDurationMin: Int? = null, // 총 이동시간
-    val totalCostEstimate: Int? = null // 총 예산
-)
-
-data class Plans(
-    val plans: List<Plan>
 )
 
 

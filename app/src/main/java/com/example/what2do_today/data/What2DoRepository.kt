@@ -5,35 +5,23 @@ import com.example.what2do_today.network.*
 class What2DoRepository {
 
     //로그인
+    //자연어만
+    suspend fun fetchFirst(query: String): FirstResponse {
+        return NetworkModule.api.getFirst(sentences = query)
+    }
 
-    // 자연어 → 카테고리 리스트
-    suspend fun fetchRecommend(
+    suspend fun fetchSecond(
+        sessionId: String,
+        selectedTags: List<String>,
         latitude: Double?,
-        longitude: Double?,
-        query: String
-    ): RecommendResponse {
-        return NetworkModule.api.getRecommend(
+        longitude: Double?
+    ): SecondResponse {
+        return NetworkModule.api.getSecond(
+            sessionId = sessionId,
             latitude = latitude,
             longitude = longitude,
-            sentences = query
+            selectedTags = selectedTags
         )
     }
-
-    // 🌟 CategoryScreen에서 태그만 필요할 때 편의 함수
-    suspend fun fetchCategories(
-        latitude: Double?,
-        longitude: Double?,
-        query: String
-    ): List<String> {
-        val res = fetchRecommend(latitude, longitude, query)
-        return res.activityTags
-    }
-
-    // 선택한 카테고리 리스트 → 코스(플랜) 리스트
-    suspend fun fetchCourses(categories: List<String>): List<Course> {
-        val res = NetworkModule.api.getPlans(categories)
-        return res.courses
-    }
-
 
 }

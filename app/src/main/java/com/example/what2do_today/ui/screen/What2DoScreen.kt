@@ -17,9 +17,6 @@ import com.example.what2do_today.viewmodel.CategoryUiState
 import com.example.what2do_today.viewmodel.What2DoViewModel
 import kotlinx.coroutines.launch
 
-private const val DEFAULT_LAT_GANGNAM = 37.4979
-private const val DEFAULT_LNG_GANGNAM = 127.0276
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun What2DoScreen(
@@ -29,17 +26,25 @@ fun What2DoScreen(
 ) {
     var query by remember { mutableStateOf(TextFieldValue("")) }
     val categoryState by vm.categoryState.collectAsState()
-    val scope = rememberCoroutineScope()
-
     val selectedCategories by vm.selectedCategories.collectAsState()
 
-    Scaffold(topBar = { TopAppBar(title = { Text("메인 기능") }) }) { inner ->
+    // 공통으로 쓸 “카테고리 요청 트리거”
+    fun requestCategories() {
+        if (query.text.isNotBlank() && categoryState !is CategoryUiState.Loading) {
+            vm.loadCategories(query = query.text)
+        }
+    }
+
+    Scaffold(
+        topBar = { TopAppBar(title = { Text("메인 기능") }) }
+    ) { inner ->
         Column(
-            Modifier
+            modifier = Modifier
                 .padding(inner)
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
+            // 🔎 자연어 입력창
             OutlinedTextField(
                 value = query,
                 onValueChange = { query = it },
@@ -52,56 +57,55 @@ fun What2DoScreen(
                 ),
                 keyboardActions = KeyboardActions(
                     onSearch = {
-                        if (query.text.isNotBlank() && categoryState !is CategoryUiState.Loading) {
-                            scope.launch {
-
-
-                                val (rawLat, rawLng) = locationHelper.getCurrentLocation()
-                                val lat = rawLat ?: DEFAULT_LAT_GANGNAM
-                                val lng = rawLng ?: DEFAULT_LNG_GANGNAM
-                                /*val (lat, lng) = locationHelper.getCurrentLocation()
-                                if (lat != null && lng != null) {
-                                    vm.setCurrentLocation(lat, lng)
-                                }*/
-                                vm.loadCategories(lat, lng, query.text)
-                            }
-                        }
+                        requestCategories()
                     }
                 )
             )
 
-            Button(
-                onClick = {
-                    if (query.text.isNotBlank() && categoryState !is CategoryUiState.Loading) {
-                        scope.launch {
-
-                            val (rawLat, rawLng) = locationHelper.getCurrentLocation()
-                            val lat = rawLat ?: DEFAULT_LAT_GANGNAM
-                            val lng = rawLng ?: DEFAULT_LNG_GANGNAM
-
-                            /*val (lat, lng) = locationHelper.getCurrentLocation()
-                            if (lat != null && lng != null) {
-                                vm.setCurrentLocation(lat, lng)
-                            }*/
-                            vm.loadCategories(lat, lng, query.text)
-                        }
-                    }
-                },
-                enabled = categoryState !is CategoryUiState.Loading && query.text.isNotBlank()
+            // 🔘 버튼들 (위치 권한 + 카테고리 요청)
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Text(
-                    if (categoryState is CategoryUiState.Loading)
-                        "요청 중..."
-                    else
-                        "카테고리 받기"
-                )
+                OutlinedButton(
+                    onClick = {
+                        locationHelper.requestLocationPermission()
+                    }
+                ) {
+                    Text("위치 권한 요청")
+                }
+
+                Button(
+                    onClick = { requestCategories() },
+                    enabled = categoryState !is CategoryUiState.Loading &&
+                            query.text.isNotBlank(),
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text(
+                        if (categoryState is CategoryUiState.Loading)
+                            "요청 중..."
+                        else
+                            "카테고리 받기"
+                    )
+                }
             }
 
             Spacer(Modifier.height(16.dp))
 
-            // 3) 아래에 카테고리 선택 UI(원래 CategoryScreen 내용)
+            // 📚 카테고리 결과 처리
             when (val s = categoryState) {
                 is CategoryUiState.Success -> {
+
+                    // ⇩ 문장에서 위치를 못 뽑은 경우에만 현재 위치를 얻어서 ViewModel에 저장
+                    LaunchedEffect(s) {
+                        val isUnknown = vm.isLocationUnknownFromFirst.value
+                        if (isUnknown) {
+                            val (rawLat, rawLng) = locationHelper.getCurrentLocation()
+                            if (rawLat != null && rawLng != null) {
+                                vm.setCurrentLocation(rawLat, rawLng)
+                            }
+                        }
+                    }
+
                     val cats = s.categories
 
                     Text("가고 싶은 카테고리를 골라주세요")
@@ -129,10 +133,8 @@ fun What2DoScreen(
 
                     Spacer(Modifier.height(12.dp))
 
-                    // ✅ 코스 보기 (예전 Plan → Course)
                     Button(
                         onClick = {
-                            // 예전 vm.loadPlans()에서 이름만 loadCourses()로 바꾼 함수라고 가정
                             vm.loadCourses()
                             goPlan()
                         },

@@ -1,7 +1,8 @@
 
-import com.example.what2do_today.network.CourseResponse
+
 import com.example.what2do_today.network.DirectionsResponse
-import com.example.what2do_today.network.RecommendResponse
+import com.example.what2do_today.network.FirstResponse
+import com.example.what2do_today.network.SecondResponse
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
@@ -12,25 +13,26 @@ interface ApiService {
     //로그인
 
 
-
     // 1) 자연어 → 카테고리 리스트 (GET, sentences 쿼리)
     @GET("api/v1/first")
-    suspend fun getRecommend(
-        @Query("latitude") latitude: Double?,
-        @Query("longitude") longitude: Double?,
+    suspend fun getFirst(
         @Query("sentences") sentences: String
-    ): RecommendResponse
-    // 서버 응답 JSON: "location":"중앙대학교","tags":["amusement_park","zoo","park"]}
+    ): FirstResponse
+    // ⚠ RecommendResponse 안에 sessionId, activityTags, location,
+    //    searchLatitude, searchLongitude 등이 있어야 함
 
 
-    // 2) 카테고리 리스트 → 코스(플랜) 목록 (GET, categories 리스트 쿼리)
-    @GET("api/v1/course")
-    suspend fun getPlans(
-        @Query("categories") categories: List<String>
-    ): CourseResponse
-    // 서버 응답 JSON: { "plans": [ ... ] }
-
+    // 2) 위치 없는 경우에만 호출하는 2단계 엔드포인트
+    //    GET /api/v1/second?sessionId=...&latitude=...&longitude=...
+    @GET("api/v1/second")
+    suspend fun getSecond(
+        @Query("sessionid") sessionId: String,
+        @Query("latitude") latitude: Double? = null,
+        @Query("longitude") longitude: Double? = null,
+        @Query("selectedtags") selectedTags: List<String>
+    ): SecondResponse
 }
+
 
 interface DirectionsApi {
 
@@ -42,6 +44,8 @@ interface DirectionsApi {
         @Query("mode") mode: String = "walking", // 도보
         @Query("key") apiKey: String
     ): DirectionsResponse
+
 }
+
 
 
