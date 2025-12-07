@@ -52,10 +52,18 @@ fun AppNav(
                 vm = vm,
                 onSelectCourse = { course ->
                     vm.selectCourse(course)
-                    nav.navigate(Routes.RESULT)
+                    nav.navigate(Routes.TMAPRESULT)
                 },
                 onBack = { nav.popBackStack() }
             )
+        }
+
+        composable(Routes.TMAPRESULT){
+            TMapResultScreen(
+                sharedVm = vm,
+                onBack = { nav.popBackStack() }
+            )
+
         }
 
         composable(Routes.RESULT) {
