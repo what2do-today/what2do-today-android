@@ -1,4 +1,5 @@
 import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
+import org.gradle.kotlin.dsl.implementation
 
 plugins {
     alias(libs.plugins.android.application)
@@ -8,14 +9,20 @@ plugins {
 val mapsApiKey: String = gradleLocalProperties(rootDir, providers)
     .getProperty("MAPS_API_KEY") ?: ""
 
+val kakaoNativeKey: String = gradleLocalProperties(rootDir, providers)
+    .getProperty("KAKAO_NATIVE_KEY") ?: ""
+
+val tmapApiKey: String = gradleLocalProperties(rootDir, providers)
+    .getProperty("TMAP_API_KEY") ?: ""
+
 android {
     namespace = "com.example.what2do_today"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.example.what2do_today"
         minSdk = 26
-        targetSdk = 34
+        targetSdk = 35
 
         versionCode = 1
         versionName = "1.0"
@@ -24,12 +31,17 @@ android {
         vectorDrawables.useSupportLibrary = true
 
         manifestPlaceholders["MAPS_API_KEY"] = mapsApiKey
+        buildConfigField("String", "MAPS_API_KEY", "\"$mapsApiKey\"")
 
-        buildConfigField(
-            "String",
-            "MAPS_API_KEY",
-            "\"$mapsApiKey\""
-        )
+
+        // 카카오 네이티브키 placeholder
+        manifestPlaceholders["KAKAO_NATIVE_KEY"] = kakaoNativeKey
+        buildConfigField("String", "KAKAO_NATIVE_KEY", "\"$kakaoNativeKey\"")
+
+        //tmap
+        manifestPlaceholders["TMAP_API_KEY"] = tmapApiKey
+        buildConfigField("String", "TMAP_API_KEY", "\"$tmapApiKey\"")
+
     }
 
     buildTypes {
@@ -68,6 +80,12 @@ dependencies {
 
     // 현재위치
     implementation(libs.play.services.location)
+    //카카오맵
+    implementation("com.kakao.maps.open:android:2.9.5")
+    //tmap
+    implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar", "*.aar"))))
+
+    implementation("com.google.android.material:material:1.11.0")
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -90,6 +108,7 @@ dependencies {
 
     implementation(libs.play.services.maps)
     implementation(libs.maps.compose)
+    implementation(libs.androidx.compose.runtime)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
