@@ -46,13 +46,6 @@ fun AppNav(
             )
         }
 
-        composable(Routes.CATEGORY) {
-            CategoryScreen(
-                vm = vm,
-                onNext = { nav.navigate(Routes.PLAN) },
-                onBack = { nav.popBackStack() }
-            )
-        }
 
         composable(Routes.PLAN) {
             PlanScreen(
