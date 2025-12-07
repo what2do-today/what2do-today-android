@@ -20,48 +20,55 @@ fun ResultScreen(
     sharedVm: What2DoViewModel,
     onBack: () -> Unit
 ) {
-    // ✅ 선택된 코스 (Course?)
+    // 선택된 코스
     val course by sharedVm.selectedCourse.collectAsState()
 
-    // ✅ 도보 루트 ViewModel
+    // 도보 루트 VM + 상태
     val routeVm: RouteViewModel = viewModel()
     val routePoints by routeVm.routePoints.collectAsState()
 
-    // ✅ 서버가 돌려준 검색 기준 위치 (searchLatitude, searchLongitude)
+    // 서버 기준 위치 (searchLatitude, searchLongitude)
     val serverLocation by sharedVm.serverSearchLocation.collectAsState()
 
-    // 서버 위치 → LatLng
-    val startLatLng: LatLng? = serverLocation?.let { (lat, lng) ->
-        LatLng(lat, lng)
-    }
-
-    // ✅ 코스 안의 장소들을 LatLng 리스트로 변환
-    val placePoints = remember(course) {
+    // 코스 안의 장소들을 LatLng 리스트로 변환
+    val placePoints: List<LatLng> = remember(course) {
         course?.places?.map { place ->
             LatLng(place.latitude, place.longitude)
         } ?: emptyList()
     }
 
-    // ✅ 지도에 찍을 마커: (시작 위치 있으면) + 코스 장소들
-    val markers = remember(startLatLng, placePoints) {
+    // 출발 위치: 서버 위치가 있으면 그걸 쓰고, 없으면 코스 첫 장소를 사용
+    val originForRoute: LatLng? = remember(serverLocation, placePoints) {
+        when {
+            serverLocation != null -> {
+                val (lat, lng) = serverLocation!!
+                LatLng(lat, lng)
+            }
+            placePoints.isNotEmpty() -> placePoints.first()
+            else -> null
+        }
+    }
+
+    // 지도에 찍을 마커: 출발점(있으면) + 코스 장소들
+    val markers: List<LatLng> = remember(originForRoute, placePoints) {
         buildList {
-            if (startLatLng != null) add(startLatLng)
+            if (originForRoute != null) add(originForRoute)
             addAll(placePoints)
         }
     }
 
-    // ✅ 카메라 기본 타겟
-    val cameraTarget: LatLng = startLatLng
+    // 카메라 기본 타겟 / 줌
+    val cameraTarget: LatLng = originForRoute
         ?: placePoints.firstOrNull()
-        ?: LatLng(37.5665, 126.9780) // fallback: 서울 시청
+        ?: LatLng(37.5665, 126.9780) // 서울 기본
 
     val cameraZoom = if (markers.size >= 2) 13f else 15f
 
-    // ✅ 출발 위치 + 코스가 준비되면 도보 루트 로딩
-    LaunchedEffect(startLatLng, placePoints) {
-        if (startLatLng != null && placePoints.isNotEmpty()) {
+    // 출발 위치 + 코스가 준비되면 도보 루트 로딩
+    LaunchedEffect(originForRoute, placePoints) {
+        if (originForRoute != null && placePoints.isNotEmpty()) {
             routeVm.loadWalkingRoute(
-                startLocation = startLatLng,
+                startLocation = originForRoute,
                 points = placePoints,
                 apiKey = BuildConfig.MAPS_API_KEY
             )
@@ -75,13 +82,9 @@ fun ResultScreen(
             TopAppBar(
                 title = { Text("코스 상세") },
                 navigationIcon = {
-                    IconButton(
-                        onClick = {
-                            // 필요하면 여기서 상태 초기화도 가능
-                            // routeVm.clearRoute()
-                            onBack()
-                        }
-                    ) {
+                    IconButton(onClick = {
+                        onBack()
+                    }) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
                             contentDescription = "뒤로"
@@ -93,7 +96,7 @@ fun ResultScreen(
     ) { inner ->
         Column(Modifier.padding(inner)) {
 
-            // 1) 지도
+            // 1) 지도 + 마커 + Polyline
             ResultMap(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -151,7 +154,7 @@ fun ResultScreen(
             }
 
             // TODO: SNS 공유 버튼
-            // TODO: 캘린더 저장 버튼 (현재 날짜 + course 정보 사용)
+            // TODO: 캘린더 저장 버튼
         }
     }
 }
