@@ -1,11 +1,13 @@
 package com.example.what2do_today
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import com.example.what2do_today.location.LocationHelper
 import com.example.what2do_today.navigation.AppNav
+import com.kakao.vectormap.KakaoMapSdk
 
 class MainActivity : ComponentActivity() {
 
@@ -29,9 +31,19 @@ class MainActivity : ComponentActivity() {
             permissionLauncher = permissionLauncher
         )
 
+        try {
+            KakaoMapSdk.init(this, BuildConfig.KAKAO_NATIVE_KEY)
+        } catch (e: Exception) {
+            Log.e("KakaoMap", "초기화 실패: ${e.message}")
+        }
+
         // ✅ 앱 UI 띄우기
         setContent {
+
+
             AppNav(locationHelper = locationHelper)
         }
+
+
     }
 }

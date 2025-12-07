@@ -9,8 +9,8 @@ object Routes {
 
     const val HOME = "home"
     const val WHAT2DO = "what2do"
-    const val CATEGORY = "category"
     const val PLAN = "plan"
+    const val TMAPRESULT = "tmap"
     const val RESULT = "result"
 
 
