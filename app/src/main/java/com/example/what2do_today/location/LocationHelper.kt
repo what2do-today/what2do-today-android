@@ -60,6 +60,21 @@ class LocationHelper(
         )
     }
 
+    // ✅ 위치 권한 여부만 간단히 확인하는 함수
+    fun hasLocationPermission(): Boolean {
+        val fineGranted = ContextCompat.checkSelfPermission(
+            activity,
+            Manifest.permission.ACCESS_FINE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+
+        val coarseGranted = ContextCompat.checkSelfPermission(
+            activity,
+            Manifest.permission.ACCESS_COARSE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+
+        return fineGranted || coarseGranted
+    }
+
     /**
      * 현재 위치 얻기 (권한 없으면 null/null)
      */
