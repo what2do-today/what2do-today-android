@@ -68,7 +68,10 @@ data class CoursePlace(
 // ------------------------------------------------------
 //길찾기
 data class DirectionsResponse(
-    val routes: List<Route>
+    val routes: List<Route>,
+    val status: String?,          // OK, ZERO_RESULTS, OVER_QUERY_LIMIT ...
+    @SerializedName("error_message")
+    val errorMessage: String? = null
 )
 
 data class Route(
