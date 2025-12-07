@@ -1,15 +1,54 @@
-*.iml
-.gradle
-/local.properties
-/.idea/caches
-/.idea/libraries
-/.idea/modules.xml
-/.idea/workspace.xml
-/.idea/navEditor.xml
-/.idea/assetWizardSettings.xml
-.DS_Store
-/build
-/captures
-.externalNativeBuild
-.cxx
+# ===============================
+# ANDROID / KOTLIN PROJECT
+# ===============================
+
+# Gradle
+.gradle/
+build/
+buildSrc/.gradle/
+**/build/
+
+# Local settings
 local.properties
+*.iml
+*.hprof
+
+# Keystore (절대 올리면 안 됨)
+*.jks
+*.keystore
+app/keystore/
+
+# IDEA / Android Studio Settings
+.idea/
+!.idea/codeStyles/          # 팀 코딩 스타일은 optional로 유지 가능할 때만
+!.idea/runConfigurations/   # 런 설정이 필요하면 유지
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# External native builds
+.externalNativeBuild/
+.cxx/
+
+# Captures / screenshots
+captures/
+
+# Misc
+*.log
+
+# If using TMap .aar in libs/, ignore unless you want to commit
+app/libs/*.aar
+app/libs/*.jar
+
+
+# ===============================
+# ADDITIONAL SAFE RULES
+# ===============================
+
+# Node modules (if ever used)
+node_modules/
+
+# Jetpack Compose preview cache
+out/
+
