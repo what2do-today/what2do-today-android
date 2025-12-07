@@ -1,5 +1,6 @@
 package com.example.what2do_today.network
 
+import com.google.gson.JsonElement
 import com.google.gson.annotations.SerializedName
 
 // 로그인
@@ -66,7 +67,7 @@ data class CoursePlace(
 
 
 // ------------------------------------------------------
-//길찾기
+//Google 길찾기
 data class DirectionsResponse(
     val routes: List<Route>,
     val status: String?,          // OK, ZERO_RESULTS, OVER_QUERY_LIMIT ...
