@@ -28,9 +28,9 @@ fun addColoredMarkers(
 ) {
     val layer = kakaoMap.labelManager?.layer ?: return
 
-    val startBitmap = vectorToBitmapTinted(context, R.drawable.red_pin, 28f, 28f, Color.parseColor("#4CAF50")) // 초록
-    val viaBitmap   = vectorToBitmapTinted(context, R.drawable.red_pin, 28f, 28f, Color.parseColor("#2196F3")) // 파랑
-    val endBitmap   = vectorToBitmapTinted(context, R.drawable.red_pin, 28f, 28f, Color.parseColor("#F44336")) // 빨강
+    val startBitmap = vectorToBitmapTinted(context, R.drawable.red_pin, 14f, 14f) // 초록
+    val viaBitmap   = vectorToBitmapTinted(context, R.drawable.red_pin, 14f, 14f) // 파랑
+    val endBitmap   = vectorToBitmapTinted(context, R.drawable.red_pin, 14f, 14f) // 빨강
 
     if (startBitmap == null || viaBitmap == null || endBitmap == null) return
 
@@ -89,13 +89,12 @@ fun vectorToBitmapTinted(
     context: Context,
     drawableId: Int,
     widthDp: Float,
-    heightDp: Float,
-    tintColor: Int
+    heightDp: Float
 ): Bitmap? {
     val drawable = ContextCompat.getDrawable(context, drawableId) ?: return null
 
     val wrapped = DrawableCompat.wrap(drawable).mutate()
-    DrawableCompat.setTint(wrapped, tintColor)
+
 
     val widthPx = dpToPx(context, widthDp)
     val heightPx = dpToPx(context, heightDp)
